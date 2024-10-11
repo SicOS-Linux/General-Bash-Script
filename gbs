@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# General Bash Script
+# Copyright 2024 Klee
+# MIT License: http://www.opensource.org/licenses/mit-license.php
+
+# Check if a URL was provided as an argument
+if [ -z "$1" ]; then
+  echo "Usage: gbs -c \"\$(wget -qO- <URL>)\""
+  exit 1
+fi
+
+# Define the URL from the first argument
+URL=$1
+
+# Display the script label before execution
+echo "==== General Bash Script ===="
+
+# Execute the script directly from the URL using wget and bash
+bash -c "$(wget -qO- "$URL")"
+
+# Check if the script execution was successful
+if [ $? -eq 0 ]; then
+  echo "Script executed successfully!"
+else
+  echo "Failed to execute script. Please check the URL and try again."
+  exit 1
+fi
