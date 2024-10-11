@@ -6,7 +6,7 @@
 
 # Check if a URL was provided as an argument
 if [ -z "$1" ]; then
-  echo "Usage: gbs -c \"\$(wget -qO- <URL>)\""
+  echo "Usage: gbs <URL>"
   exit 1
 fi
 
