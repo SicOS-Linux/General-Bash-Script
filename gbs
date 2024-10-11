@@ -1,28 +1,76 @@
 #!/bin/bash
 
-# General Bash Script
-# Copyright 2024 Klee
-# MIT License: http://www.opensource.org/licenses/mit-license.php
+# General Bash Script (GBS)
+# © 2024 Júlia Klee
+# Licensed under the MIT License: https://opensource.org/licenses/MIT
 
-# Check if a URL was provided as an argument
-if [ -z "$1" ]; then
-  echo "Usage: gbs <URL>"
+# Colors for formatting
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'  # No Color
+
+# Function to display headers
+print_header() {
+  echo -e "${CYAN}===== General Bash Script =====${NC}"
+}
+
+# Function to print success message
+print_success() {
+  echo -e "${GREEN}[✔] $1${NC}"
+}
+
+# Function to print error message
+print_error() {
+  echo -e "${RED}[✖] $1${NC}"
+}
+
+# Function to print command message
+print_command() {
+  echo -e "${YELLOW}[→] $1${NC}"
+}
+
+# Validate if a URL has been provided
+if [[ -z "$1" ]]; then
+  print_error "Usage: gbs <URL>"
   exit 1
 fi
 
-# Define the URL from the first argument
-URL=$1
+# Assign the URL to a variable
+URL="$1"
 
-# Display the script label before execution
-echo "==== General Bash Script ===="
+# Display the header
+print_header
 
-# Execute the script directly from the URL using wget and bash
-bash -c "$(wget -qO- "$URL")"
+# Attempt to download the script into a temporary file
+TEMP_FILE=$(mktemp)
 
-# Check if the script execution was successful
-if [ $? -eq 0 ]; then
-  echo "Script executed successfully!"
+print_command "Downloading script from: $URL"
+if wget -qO "$TEMP_FILE" "$URL"; then
+  # Check if the file is not empty
+  if [[ -s "$TEMP_FILE" ]]; then
+    print_success "Download completed successfully!"
+    
+    print_command "Executing the script..."
+    bash "$TEMP_FILE"
+    
+    if [[ $? -eq 0 ]]; then
+      print_success "Script executed successfully!"
+      rm -f "$TEMP_FILE"  # Clean up
+      exit 0  # Success, exit with status 0
+    else
+      print_error "Error: Script execution failed."
+      rm -f "$TEMP_FILE"  # Clean up
+      exit 1  # Failure during execution, exit with status 1
+    fi
+  else
+    print_error "Error: The downloaded script is empty or invalid."
+    rm -f "$TEMP_FILE"  # Clean up
+    exit 1  # Failure due to empty or invalid script
+  fi
 else
-  echo "Failed to execute script. Please check the URL and try again."
-  exit 1
+  print_error "Error: Failed to download the script. Please check the URL."
+  rm -f "$TEMP_FILE"  # Clean up
+  exit 1  # Failure due to download error
 fi
